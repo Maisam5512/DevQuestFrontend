@@ -1,41 +1,58 @@
+import { authAPI } from '@/lib/api'
+
 export async function GET(request) {
-  const token = request.headers.get('authorization')
+  const token = request.headers.get('authorization')?.replace('Bearer ', '')
 
-  // Mock implementation
-  const projects = [
-    {
-      id: '1',
-      title: 'Mobile App Redesign',
-      description: 'Redesign the mobile app UI for better UX',
-      clientId: 'client1',
-      pmId: 'pm1',
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      tasksCount: 8
-    },
-    {
-      id: '2',
-      title: 'API Integration',
-      description: 'Integrate third-party payment API',
-      clientId: 'client2',
-      pmId: 'pm1',
-      deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      tasksCount: 5
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/projects`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      return Response.json({ message: 'Failed to fetch projects' }, { status: 404 })
     }
-  ]
 
-  return Response.json(projects)
+    const projects = await response.json()
+    return Response.json(projects)
+  } catch (error) {
+    console.error('[v0] Error fetching projects:', error)
+    return Response.json({ message: 'Server error' }, { status: 500 })
+  }
 }
 
 export async function POST(request) {
-  const { title, description, deadline } = await request.json()
+  const token = request.headers.get('authorization')?.replace('Bearer ', '')
 
-  const project = {
-    id: Math.random().toString(36).substr(2, 9),
-    title,
-    description,
-    deadline,
-    tasksCount: 0
+  try {
+    const body = await request.json()
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/projects`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        title: body.title,
+        description: body.description,
+        pm: body.pm,
+        deadline: body.deadline,
+        tags: body.tags || [],
+        projectXp: body.projectXp || 0
+      })
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      return Response.json(error, { status: response.status })
+    }
+
+    const project = await response.json()
+    return Response.json(project, { status: 201 })
+  } catch (error) {
+    console.error('[v0] Error creating project:', error)
+    return Response.json({ message: 'Server error' }, { status: 500 })
   }
-
-  return Response.json(project)
 }

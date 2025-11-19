@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import TaskColumn from './task-column'
 
-export default function KanbanBoard({ tasks, setTasks }) {
-  const [draggedTask, setDraggedTask] = useState(null)
+export default function KanbanBoard({ data, userRole }) {
+  const [draggedItem, setDraggedItem] = useState(null)
+  const [items, setItems] = useState(data.data)
 
-  const handleDragStart = (e, task, fromColumn) => {
-    setDraggedTask({ task, fromColumn })
+  const handleDragStart = (e, item, fromColumn) => {
+    setDraggedItem({ item, fromColumn })
   }
 
   const handleDragOver = (e) => {
@@ -16,38 +17,92 @@ export default function KanbanBoard({ tasks, setTasks }) {
 
   const handleDrop = (e, toColumn) => {
     e.preventDefault()
-    if (!draggedTask) return
+    if (!draggedItem) return
 
-    const { task, fromColumn } = draggedTask
+    const { item, fromColumn } = draggedItem
 
     if (fromColumn === toColumn) {
-      setDraggedTask(null)
+      setDraggedItem(null)
       return
     }
 
-    setTasks(prev => ({
+    setItems(prev => ({
       ...prev,
-      [fromColumn]: prev[fromColumn].filter(t => t.id !== task.id),
-      [toColumn]: [...prev[toColumn], task],
+      [fromColumn]: prev[fromColumn].filter(t => t.id !== item.id),
+      [toColumn]: [...prev[toColumn], item],
     }))
 
-    setDraggedTask(null)
+    setDraggedItem(null)
   }
 
+  if (data.type === 'projects') {
+    // Client view: Project status columns
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+        <TaskColumn
+          title="Assigned"
+          columnKey="assigned"
+          items={items.assigned}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          isProject
+        />
+        <TaskColumn
+          title="Accepted"
+          columnKey="accepted"
+          items={items.accepted}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          isProject
+        />
+        <TaskColumn
+          title="Working"
+          columnKey="working"
+          items={items.working}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          isProject
+        />
+        <TaskColumn
+          title="Completed"
+          columnKey="completed"
+          items={items.completed}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          isProject
+        />
+        <TaskColumn
+          title="Cancelled"
+          columnKey="cancelled"
+          items={items.cancelled}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          isProject
+        />
+      </div>
+    )
+  }
+
+  // PM and Developer view: Task status columns
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       <TaskColumn
         title="To Do"
         columnKey="todo"
-        tasks={tasks.todo}
+        items={items.todo}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       />
       <TaskColumn
         title="In Progress"
-        columnKey="inProgress"
-        tasks={tasks.inProgress}
+        columnKey="in_progress"
+        items={items.in_progress}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
@@ -55,7 +110,7 @@ export default function KanbanBoard({ tasks, setTasks }) {
       <TaskColumn
         title="In Review"
         columnKey="review"
-        tasks={tasks.review}
+        items={items.review}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
@@ -63,7 +118,7 @@ export default function KanbanBoard({ tasks, setTasks }) {
       <TaskColumn
         title="Done"
         columnKey="done"
-        tasks={tasks.done}
+        items={items.done}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={handleDrop}

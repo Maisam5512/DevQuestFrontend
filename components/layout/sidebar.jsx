@@ -2,17 +2,24 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, Kanban, Trophy, User } from 'lucide-react'
+import { LayoutGrid, Kanban, Trophy, User, Plus } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname()
+  const { user } = useAuth()
 
-  const navItems = [
+  const baseNavItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
     { href: '/dashboard/kanban', label: 'Kanban Board', icon: Kanban },
     { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/dashboard/profile', label: 'Profile', icon: User },
   ]
+
+  // Add "Add Project" only for clients
+  const navItems = user?.role === 'client' 
+    ? [...baseNavItems, { href: '/dashboard/projects/create', label: 'Add Project', icon: Plus }]
+    : baseNavItems
 
   return (
     <>
