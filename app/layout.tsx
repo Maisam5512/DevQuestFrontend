@@ -39,40 +39,34 @@
 
 
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import { Toaster } from 'sonner'
 import './globals.css'
+import { Toaster } from 'sonner'
+import { AuthProvider } from '@/hooks/useAuth'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const _geistSans = Geist({ subsets: ['latin'] })
+const _geistMono = Geist_Mono({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'DevQuest - Gamified Project Management',
-  description: 'Turn project management into an RPG adventure',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-    ],
-  },
+  description: 'Complete quests, earn XP, and level up your team',
+}
+
+export const viewport = {
+  themeColor: '#0f172a',
+  userScalable: 'yes',
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">
-        {children}
-        <Toaster />
-        <Analytics />
+      <body>
+        <AuthProvider>
+          {children}
+          <Toaster position="top-right" />
+        </AuthProvider>
       </body>
     </html>
   )
 }
+
 

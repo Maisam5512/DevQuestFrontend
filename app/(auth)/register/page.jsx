@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Gamepad2, Mail, Lock, User, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function RegisterPage() {
+  const { register } = useAuth()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -44,22 +46,12 @@ export default function RegisterPage() {
         return
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      localStorage.setItem('user', JSON.stringify({
-        id: '1',
-        email,
-        name,
-        role,
-        xp: 0,
-        level: 1,
-        badges: [],
-      }))
+      await register(name, email, password, role)
 
       toast.success('Welcome to DevQuest, ' + name + '!')
       router.push('/dashboard')
     } catch (error) {
-      toast.error('Registration failed. Please try again.')
+      toast.error(error.message || 'Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
     }

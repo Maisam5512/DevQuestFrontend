@@ -64,9 +64,9 @@ export default function HomePage() {
             {[
               { icon: Zap, title: 'XP & Leveling', desc: 'Earn experience for every task completed. Auto-calculate levels and unlock new achievements.' },
               { icon: Trophy, title: 'Badges & Achievements', desc: 'Collect unique badges. First Task, 5 Tasks Completed, Level 5+. Show off your skills.' },
-              { icon: Users, title: 'Team Leaderboard', desc: 'Real-time global ranking. Compete with teammates. See who\'s the top adventurer.' },
+              { icon: Users, title: 'Team Leaderboard', desc: 'Real-time global ranking. Compete with teammates. See who is the top adventurer.' },
               { icon: Target, title: 'Role-Based System', desc: 'Client, PM, Developer. Each role has unique powers, responsibilities, and abilities.' },
-              { icon: Gamepad2, title: 'Kanban Board', desc: 'Drag & drop tasks through To Do → In Progress → Review → Done. Real-time sync.' },
+              { icon: Gamepad2, title: 'Kanban Board', desc: 'Drag and drop tasks through To Do, In Progress, Review, Done. Real-time sync.' },
               { icon: Trophy, title: 'Real-Time Updates', desc: 'Watch leaderboards update instantly. See teammate progress live. No refresh needed.' },
             ].map((feature, i) => {
               const Icon = feature.icon

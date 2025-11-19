@@ -1,27 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Gamepad2, LogOut, User, Bell, Menu, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuth } from '@/hooks/useAuth'
+import { useState } from 'react'
 
 export default function Navbar({ sidebarOpen, setSidebarOpen }) {
-  const router = useRouter()
-  const [user, setUser] = useState(null)
+  const { user, logout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      setUser(JSON.parse(userData))
-    }
-  }, [])
-
   const handleLogout = () => {
-    localStorage.removeItem('user')
-    toast.success('See you later, adventurer!')
-    router.push('/login')
+    logout()
   }
 
   return (
@@ -59,13 +49,13 @@ export default function Navbar({ sidebarOpen, setSidebarOpen }) {
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-xs sm:text-sm font-medium text-white hidden sm:inline truncate max-w-[120px]">
-                  {user?.name}
+                  {user?.name || 'User'}
                 </span>
               </button>
 
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-lg overflow-hidden z-50">
-                  <Link href="/profile" className=" px-4 py-2 text-white hover:bg-slate-800 transition flex items-center gap-2 text-sm">
+                  <Link href="/profile" className="px-4 py-2 text-white hover:bg-slate-800 transition flex items-center gap-2 text-sm">
                     <User className="w-4 h-4" /> Profile
                   </Link>
                   <button
