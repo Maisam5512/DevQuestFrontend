@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, Kanban, Trophy, User, Plus } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { LayoutGrid, Kanban, Trophy, User ,Plus } from 'lucide-react'
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname()
@@ -14,6 +13,8 @@ export default function Sidebar({ isOpen, onClose }) {
     { href: '/dashboard/kanban', label: 'Kanban Board', icon: Kanban },
     { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/dashboard/profile', label: 'Profile', icon: User },
+        { href: '/dashboard/assignTask', label: 'Create new Task', icon: Plus },
+
   ]
 
   // Add "Add Project" only for clients
