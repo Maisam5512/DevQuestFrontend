@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutGrid, Kanban, Trophy, User ,Plus } from 'lucide-react'
+import useAuth from '../../hooks/userAPI'
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname()
@@ -13,14 +14,26 @@ export default function Sidebar({ isOpen, onClose }) {
     { href: '/dashboard/kanban', label: 'Kanban Board', icon: Kanban },
     { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/dashboard/profile', label: 'Profile', icon: User },
-        { href: '/dashboard/assignTask', label: 'Create new Task', icon: Plus },
+        
 
   ]
+let navItems;
 
-  // Add "Add Project" only for clients
-  const navItems = user?.role === 'client' 
-    ? [...baseNavItems, { href: '/dashboard/projects/create', label: 'Add Project', icon: Plus }]
-    : baseNavItems
+if (user?.role === "client") {
+  navItems = [
+    ...baseNavItems,
+    { href: "/dashboard/projects/create", label: "Add Project", icon: Plus },
+  ];
+} 
+else if (user?.role === "pm") {
+  navItems = [
+    ...baseNavItems,
+    { href: "/dashboard/assignTask", label: "Create New Task", icon: Plus },
+  ];
+}
+else {
+  navItems = [...baseNavItems];
+}
 
   return (
     <>
