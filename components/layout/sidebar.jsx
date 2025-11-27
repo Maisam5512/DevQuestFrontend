@@ -22,7 +22,7 @@ let navItems;
 if (user?.role === "client") {
   navItems = [
     ...baseNavItems,
-    { href: "/dashboard/projects/create", label: "Add Project", icon: Plus },
+    { href: "/dashboard/projects", label: "Add Project", icon: Plus },
   ];
 } 
 else if (user?.role === "pm") {
