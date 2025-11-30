@@ -1,39 +1,61 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useTask } from '@/hooks/useTask';
-import useAuth from '@/hooks/userAPI.js';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from "react";
+import { useTask } from "@/hooks/useTask";
+import useAuth from "@/hooks/userAPI"; // Removed .js extension from import
+import useProject from "@/hooks/useProject"; // Added useProject hook import
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export default function TasksPage() {
-  const { tasks, loading, error, createTask, fetchTasks, updateTask, deleteTask } = useTask();
-  const { getDeveloperUsers } = useAuth();
+  const {
+    tasks,
+    loading,
+    error,
+    createTask,
+    fetchTasks,
+    updateTask,
+    deleteTask,
+  } = useTask();
+  const { getDeveloperUsers, user } = useAuth();
+  const { projects, getProjectsByUser } = useProject();
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'medium',
-    xp: '',
-    deadline: '',
-    assignedTo: '',
+    title: "",
+    description: "",
+    priority: "medium",
+    xp: "",
+    deadline: "",
+    assignedTo: "",
+    projectId: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [developers, setDevelopers] = useState([]);
   const [editingTaskId, setEditingTaskId] = useState(null);
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        await getProjectsByUser();
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+      }
+    };
+    loadProjects();
+  }, [getProjectsByUser]);
 
   useEffect(() => {
     const loadDevelopers = async () => {
@@ -43,7 +65,7 @@ export default function TasksPage() {
           setDevelopers(result.data || []);
         }
       } catch (err) {
-        console.error('Failed to fetch developers:', err);
+        console.error("Failed to fetch developers:", err);
       }
     };
     loadDevelopers();
@@ -71,27 +93,36 @@ export default function TasksPage() {
     }));
   };
 
+  const handleProjectChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      projectId: value,
+    }));
+  };
+
   const handleEditTask = (task) => {
     setEditingTaskId(task._id);
     setFormData({
       title: task.title,
-      description: task.description || '',
-      priority: task.priority || 'medium',
-      xp: task.xp || '',
-      deadline: task.deadline ? task.deadline.split('T')[0] : '',
-      assignedTo: task.assignedTo || '',
+      description: task.description || "",
+      priority: task.priority || "medium",
+      xp: task.xp || "",
+      deadline: task.deadline ? task.deadline.split("T")[0] : "",
+      assignedTo: task.assignedTo || "",
+      projectId: task.projectId || "",
     });
   };
 
   const handleCancelEdit = () => {
     setEditingTaskId(null);
     setFormData({
-      title: '',
-      description: '',
-      priority: 'medium',
-      xp: '',
-      deadline: '',
-      assignedTo: '',
+      title: "",
+      description: "",
+      priority: "medium",
+      xp: "",
+      deadline: "",
+      assignedTo: "",
+      projectId: "",
     });
   };
 
@@ -99,12 +130,12 @@ export default function TasksPage() {
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      toast.error('Task title is required');
+      toast.error("Task title is required");
       return;
     }
 
     if (!formData.xp || isNaN(Number(formData.xp))) {
-      toast.error('Valid XP value is required');
+      toast.error("Valid XP value is required");
       return;
     }
 
@@ -118,78 +149,99 @@ export default function TasksPage() {
         xp: Number(formData.xp),
         deadline: formData.deadline || undefined,
         ...(formData.assignedTo && { assignedTo: formData.assignedTo }),
+        ...(formData.projectId && { projectId: formData.projectId }),
       };
 
       if (editingTaskId) {
         await updateTask(editingTaskId, taskPayload);
-        toast.success('Task updated successfully');
+        toast.success("Task updated successfully");
         handleCancelEdit();
       } else {
         await createTask(taskPayload);
-        toast.success('Task created successfully');
+        toast.success("Task created successfully");
         setFormData({
-          title: '',
-          description: '',
-          priority: 'medium',
-          xp: '',
-          deadline: '',
-          assignedTo: '',
+          title: "",
+          description: "",
+          priority: "medium",
+          xp: "",
+          deadline: "",
+          assignedTo: "",
+          projectId: "",
         });
       }
     } catch (err) {
-      toast.error(err.message || 'Operation failed');
+      toast.error(err.message || "Operation failed");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+    if (window.confirm("Are you sure you want to delete this task?")) {
       try {
         await deleteTask(taskId);
-        toast.success('Task deleted successfully');
+        toast.success("Task deleted successfully");
       } catch (err) {
-        toast.error(err.message || 'Failed to delete task');
+        toast.error(err.message || "Failed to delete task");
       }
     }
   };
 
-  const sortedTasks = [...tasks].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  );
+  const sortedTasks = [...tasks].filter((task) => {
+    // Task check
+    // console.log("Filtering task:", task);
+    // console.log("Task created By", task.createdBy);
+    // console.log("The User Id", user.id);
+
+    // Dono ko string bana do warna filter kabhi nahi chalega
+    return String(task.createdBy._id) === String(user.id);
+  });
+  // .sort((a, b) => {
+  //   return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  // });
 
   const formatDate = (dateString) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
+      return new Date(dateString).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       });
     } catch {
-      return 'Invalid date';
+      return "Invalid date";
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'assigned':
-        return 'bg-blue-900 text-blue-100';
-      case 'accepted':
-        return 'bg-purple-900 text-purple-100';
-      case 'in_progress':
-        return 'bg-yellow-900 text-yellow-100';
-      case 'review':
-        return 'bg-orange-900 text-orange-100';
-      case 'done':
-        return 'bg-green-900 text-green-100';
+      case "assigned":
+        return "bg-blue-900 text-blue-100";
+      case "accepted":
+        return "bg-purple-900 text-purple-100";
+      case "in_progress":
+        return "bg-yellow-900 text-yellow-100";
+      case "review":
+        return "bg-orange-900 text-orange-100";
+      case "done":
+        return "bg-green-900 text-green-100";
       default:
-        return 'bg-gray-700 text-gray-100';
+        return "bg-gray-700 text-gray-100";
     }
   };
 
   const getDeveloperName = (developerId) => {
-    const developer = developers.find((d) => d._id === developerId);
-    return developer ? developer.name : 'Unassigned';
+    const developer = developers.find((d) => d._id === developerId._id);
+    console.log("The developerId:",developerId);
+    return developer ? developer.name : "Unassigned";
+  };
+
+  const getProjectName = (projectId) => {
+    const project = projects.find((p) => p._id === projectId._id);
+    //console.log("The cureent Project is: ", project);
+    //console.log("The cureent ProjectId is: ", projectId._id);
+   // console.log("The cureent Project._id is: ", p._id);
+
+    return project ? project.title : "No Project";
   };
 
   return (
@@ -205,7 +257,7 @@ export default function TasksPage() {
             <Card className="bg-gray-900 border-gray-800">
               <div className="p-6">
                 <h2 className="mb-6 text-xl font-semibold text-white">
-                  {editingTaskId ? 'Edit Task' : 'Create New Task'}
+                  {editingTaskId ? "Edit Task" : "Create New Task"}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -255,13 +307,22 @@ export default function TasksPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-gray-800 border-gray-700">
-                        <SelectItem value="low" className="text-white hover:bg-gray-700">
+                        <SelectItem
+                          value="low"
+                          className="text-white hover:bg-gray-700"
+                        >
                           Low
                         </SelectItem>
-                        <SelectItem value="medium" className="text-white hover:bg-gray-700">
+                        <SelectItem
+                          value="medium"
+                          className="text-white hover:bg-gray-700"
+                        >
                           Medium
                         </SelectItem>
-                        <SelectItem value="high" className="text-white hover:bg-gray-700">
+                        <SelectItem
+                          value="high"
+                          className="text-white hover:bg-gray-700"
+                        >
                           High
                         </SelectItem>
                       </SelectContent>
@@ -302,6 +363,43 @@ export default function TasksPage() {
                     />
                   </div>
 
+                  {/* Project Selection Field */}
+                  <div>
+                    <Label htmlFor="projectId" className="text-gray-200">
+                      Project
+                    </Label>
+                    <Select
+                      value={formData.projectId}
+                      onValueChange={handleProjectChange}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="mt-1 bg-gray-800 border-gray-700 text-white">
+                        <SelectValue placeholder="Select a project" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        {projects && projects.length > 0 ? (
+                          projects.map((project) => (
+                            <SelectItem
+                              key={project._id}
+                              value={project._id}
+                              className="text-white hover:bg-gray-700"
+                            >
+                              {project.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem
+                            value="no-projects"
+                            disabled
+                            className="text-gray-500"
+                          >
+                            No projects available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div>
                     <Label htmlFor="assignedTo" className="text-gray-200">
                       Assign Developer
@@ -312,7 +410,7 @@ export default function TasksPage() {
                       disabled={isSubmitting}
                     >
                       <SelectTrigger className="mt-1 bg-gray-800 border-gray-700 text-white">
-                        <SelectValue placeholder="Select a developer (optional)" />
+                        <SelectValue placeholder="Select a developer" />
                       </SelectTrigger>
                       <SelectContent className="bg-gray-800 border-gray-700">
                         {developers.map((dev) => (
@@ -336,11 +434,11 @@ export default function TasksPage() {
                     >
                       {isSubmitting
                         ? editingTaskId
-                          ? 'Updating...'
-                          : 'Creating...'
+                          ? "Updating..."
+                          : "Creating..."
                         : editingTaskId
-                        ? 'Update Task'
-                        : 'Create Task'}
+                        ? "Update Task"
+                        : "Create Task"}
                     </Button>
                     {editingTaskId && (
                       <Button
@@ -382,13 +480,27 @@ export default function TasksPage() {
                   <div className="py-12 text-center">
                     <div className="mb-4 flex justify-center">
                       <div className="rounded-full bg-gray-800 p-3">
-                        <svg className="h-8 w-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <svg
+                          className="h-8 w-8 text-gray-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
                         </svg>
                       </div>
                     </div>
-                    <p className="text-lg font-medium text-gray-300">No tasks available</p>
-                    <p className="mt-1 text-sm text-gray-500">Create a new task to get started</p>
+                    <p className="text-lg font-medium text-gray-300">
+                      No tasks available
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Create a new task to get started
+                    </p>
                   </div>
                 )}
 
@@ -421,6 +533,12 @@ export default function TasksPage() {
                               {task.xp && (
                                 <span className="text-xs px-2 py-1 rounded bg-indigo-900 text-indigo-100 font-medium">
                                   {task.xp} XP
+                                </span>
+                              )}
+
+                              {task.projectId && (
+                                <span className="text-xs px-2 py-1 rounded bg-green-900 text-green-100 font-medium">
+                                  {getProjectName(task.projectId)}
                                 </span>
                               )}
 

@@ -13,7 +13,7 @@ export function useUser() {
         const response = await fetch('http://localhost:4000/api/auth/user/all', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('devQuestUserToken')}`
           }
         });
 

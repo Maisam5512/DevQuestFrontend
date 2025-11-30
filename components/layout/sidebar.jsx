@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, Kanban, Trophy, User ,Plus } from 'lucide-react'
+import { LayoutGrid, Kanban, Trophy, User ,Plus ,ClipboardList} from 'lucide-react'
 import useAuth from '../../hooks/userAPI'
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -28,7 +28,9 @@ if (user?.role === "client") {
 else if (user?.role === "pm") {
   navItems = [
     ...baseNavItems,
-    { href: "/dashboard/assignTask", label: "Create New Task", icon: Plus },
+    { href: "/dashboard/myProjects", label: "My Projects", icon: ClipboardList },
+        { href: "/dashboard/assignTask", label: "Create New Task", icon: Plus },
+
   ];
 }
 else {

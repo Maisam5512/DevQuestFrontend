@@ -14,10 +14,10 @@ export default function ProjectsPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('devQuestUserToken')
         console.log('[v0] Token:', token ? 'exists' : 'missing')
         
-        const response = await fetch('http://localhost:4000/api/project/all', {
+        const response = await fetch('http://localhost:4000/api/project/', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Cache-Control': 'no-cache, no-store, must-revalidate',

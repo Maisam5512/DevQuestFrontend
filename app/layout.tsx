@@ -38,6 +38,7 @@
 
 
 
+
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
@@ -49,6 +50,9 @@ const _geistMono = Geist_Mono({ subsets: ['latin'] })
 export const metadata = {
   title: 'DevQuest - Gamified Project Management',
   description: 'Complete quests, earn XP, and level up your team',
+  icons: {
+    icon: '/logo.png',
+  },
 }
 
 export const viewport = {
@@ -68,5 +72,3 @@ export default function RootLayout({ children }) {
     </html>
   )
 }
-
-

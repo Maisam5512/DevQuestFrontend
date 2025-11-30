@@ -14,8 +14,8 @@ export default function ProfilePage() {
   }, [])
 
   if (!user) return null
-
-  const badges = ['First Quest', '5 Tasks', 'Level 5', 'Speedrunner', 'Legendary']
+ 
+  //const badges = ['First Quest', '5 Tasks', 'Level 5', 'Speedrunner', 'Legendary']
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -28,7 +28,7 @@ export default function ProfilePage() {
           </div>
           <div className="text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{user.name}</h2>
-            <p className="text-xs sm:text-sm text-slate-400 capitalize mt-1">{user.role.replace('_', ' ')}</p>
+            <p className="text-xs sm:text-sm text-slate-400 capitalize mt-1">{user.role==='pm'?'Project Manager':user.role}</p>
             <p className="text-xs sm:text-sm text-cyan-400 font-medium mt-2">{user.email}</p>
           </div>
         </div>
@@ -37,21 +37,21 @@ export default function ProfilePage() {
           <div className="bg-slate-900 rounded-lg p-3 sm:p-4 text-center">
             <div className="flex items-center justify-center gap-1 sm:gap-2 mb-2">
               <Zap className="w-4 h-4 text-blue-500" />
-              <span className="text-lg sm:text-2xl font-bold text-white">2.4K</span>
+              <span className="text-lg sm:text-2xl font-bold text-white">{user.xp}</span>
             </div>
             <p className="text-xs text-slate-400">Total XP</p>
           </div>
           <div className="bg-slate-900 rounded-lg p-3 sm:p-4 text-center">
             <div className="flex items-center justify-center gap-1 sm:gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-cyan-400" />
-              <span className="text-lg sm:text-2xl font-bold text-white">5</span>
+              <span className="text-lg sm:text-2xl font-bold text-white">{user.level}</span>
             </div>
             <p className="text-xs text-slate-400">Level</p>
           </div>
           <div className="bg-slate-900 rounded-lg p-3 sm:p-4 text-center">
             <div className="flex items-center justify-center gap-1 sm:gap-2 mb-2">
               <Award className="w-4 h-4 text-purple-500" />
-              <span className="text-lg sm:text-2xl font-bold text-white">8</span>
+              <span className="text-lg sm:text-2xl font-bold text-white">{user.badges.length}</span>
             </div>
             <p className="text-xs text-slate-400">Badges</p>
           </div>
@@ -61,7 +61,7 @@ export default function ProfilePage() {
       <div>
         <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Achievements</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          {badges.map((badge, i) => (
+          {user.badges.map((badge, i) => (
             <div key={i} className="card-glow p-4 text-center">
               <div className="text-2xl sm:text-3xl mb-2">🏆</div>
               <p className="text-xs sm:text-sm font-medium text-white wrap-break-word">{badge}</p>

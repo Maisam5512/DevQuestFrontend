@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('devQuestUserToken');
       const storedUser = localStorage.getItem('user');
 
       if (token && storedUser) {
@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
           setUser(JSON.parse(storedUser));
           setIsAuthenticated(true);
         } catch (error) {
-          localStorage.removeItem('token');
+          localStorage.removeItem('devQuestUserToken');
           localStorage.removeItem('user');
           setIsAuthenticated(false);
         }
@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
       
       setUser(response.user);
       setIsAuthenticated(true);
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('devQuestUserToken', response.devQuestUserToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       
       toast.success('Registration successful!');
@@ -63,7 +63,7 @@ export function AuthProvider({ children }) {
       
       setUser(response.user);
       setIsAuthenticated(true);
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('devQuestUserToken', response.devQuestUserToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       
       toast.success('Welcome back, adventurer!');
