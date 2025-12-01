@@ -57,7 +57,7 @@ export default function CreateProjectPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('devQuestUserToken')}`
         },
         body: JSON.stringify(payload)
       })

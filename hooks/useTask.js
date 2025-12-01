@@ -6,7 +6,7 @@ export const useTask = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('devQuestUserToken');
 
   const parseResponse = async (response) => {
     const contentType = response.headers.get('content-type');
@@ -62,8 +62,8 @@ export const useTask = () => {
       setError('Not authenticated');
       return;
     }
-
-    try {
+    console.log("this is the data that has come to submit" , taskData);
+    try { 
       const response = await fetch(`${API_BASE_URL}/tasks/create`, {
         method: 'POST',
         headers: {
@@ -98,7 +98,7 @@ export const useTask = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+      const response = await fetch(`${API_BASE_URL}/tasks/edit/${taskId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

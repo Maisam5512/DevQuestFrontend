@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(localStorage.getItem('devQuestUserToken') || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
@@ -18,7 +18,7 @@ const useAuth = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/auth/user/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,8 +33,8 @@ const useAuth = () => {
       }
 
       setUser(data.user);
-      setToken(data.token);
-      localStorage.setItem('authToken', data.token);
+      setToken(data.devQuestUserToken);
+      localStorage.setItem('devQuestUserToken', data.devQuestUserToken);
 
       return { success: true, data };
     } catch (err) {
@@ -52,7 +52,7 @@ const useAuth = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,10 +65,10 @@ const useAuth = () => {
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
-
+      console.log("the data is:" , data);
       setUser(data.user);
-      setToken(data.token);
-      localStorage.setItem('authToken', data.token);
+      setToken(data.devQuestUserToken);
+      localStorage.setItem('devQuestUserToken', data.devQuestUserToken);
 
       return { success: true, data };
     } catch (err) {
@@ -107,7 +107,7 @@ const useAuth = () => {
     } catch (err) {
       setError(err.message);
       setToken(null);
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('devQuestUserToken');
       return { success: false, error: err.message };
     } finally {
       setLoading(false);

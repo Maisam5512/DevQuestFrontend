@@ -16,7 +16,7 @@ const useProject = () => {
       setError(null);
       setSuccess(null);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('devQuestUserToken');
       const headers = {
         'Content-Type': 'application/json',
       };
@@ -54,7 +54,7 @@ const useProject = () => {
   // CREATE PROJECT
   const createProject = useCallback(async (projectData) => {
     try {
-      const result = await apiCall('/projects/create', 'POST', projectData);
+      const result = await apiCall('/project/create', 'POST', projectData);
       setCurrentProject(result.project);
       setSuccess(result.message);
       return result.project;
@@ -67,7 +67,7 @@ const useProject = () => {
   const assignPM = useCallback(async (projectId, pmId) => {
     try {
       const result = await apiCall(
-        `/projects/${projectId}/assign-pm`,
+        `/project/${projectId}/assign-pm`,
         'PUT',
         { pmId }
       );
@@ -83,7 +83,7 @@ const useProject = () => {
   const acceptProject = useCallback(async (projectId) => {
     try {
       const result = await apiCall(
-        `/projects/${projectId}/accept`,
+        `/project/${projectId}/accept`,
         'PUT'
       );
       setCurrentProject(result.project);
@@ -98,7 +98,7 @@ const useProject = () => {
   const startWorking = useCallback(async (projectId) => {
     try {
       const result = await apiCall(
-        `/projects/${projectId}/start`,
+        `/project/${projectId}/start`,
         'PUT'
       );
       setCurrentProject(result.project);
@@ -113,7 +113,7 @@ const useProject = () => {
   const cancelProject = useCallback(async (projectId) => {
     try {
       const result = await apiCall(
-        `/projects/${projectId}/cancel`,
+        `/project/${projectId}/cancel`,
         'PUT'
       );
       setCurrentProject(result.project);
@@ -128,7 +128,7 @@ const useProject = () => {
   const completeProject = useCallback(async (projectId) => {
     try {
       const result = await apiCall(
-        `/projects/${projectId}/complete`,
+        `/project/${projectId}/complete`,
         'PUT'
       );
       setCurrentProject(result.project);
@@ -165,7 +165,9 @@ const useProject = () => {
   const getProjectsByUser = useCallback(async () => {
     try {
       const result = await apiCall('/project/', 'GET');
+     // console.log("this is the api call result", result);
       setProjects(result);
+     // console.log("Theses are the logged in user's project" , projects);
       return result;
     } catch (err) {
       throw err;
