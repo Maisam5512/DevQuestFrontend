@@ -172,6 +172,36 @@ const useProject = () => {
     }
   }, [apiCall]);
 
+
+  // UPDATE PROJECT
+const updateProject = useCallback(async (projectId, projectData) => {
+  try {
+    const result = await apiCall(`/project/${projectId}`, 'PUT', projectData);
+    setCurrentProject(result.project);
+    setSuccess(result.message);
+    // Update the project in the projects array
+    setProjects(prev => prev.map(proj => 
+      proj._id === projectId ? result.project : proj
+    ));
+    return result.project;
+  } catch (err) {
+    throw err;
+  }
+}, [apiCall]);
+
+// DELETE PROJECT
+const deleteProject = useCallback(async (projectId) => {
+  try {
+    const result = await apiCall(`/project/${projectId}`, 'DELETE');
+    setSuccess(result.message);
+    // Remove the project from the projects array
+    setProjects(prev => prev.filter(proj => proj._id !== projectId));
+    return result;
+  } catch (err) {
+    throw err;
+  }
+}, [apiCall]);
+
   // CLEAR STATES
   const clearError = useCallback(() => setError(null), []);
   const clearSuccess = useCallback(() => setSuccess(null), []);
@@ -200,7 +230,8 @@ const useProject = () => {
     getAllProjects,
     getProjectById,
     getProjectsByUser,
-
+    updateProject,
+     deleteProject,
     // Utilities
     clearError,
     clearSuccess,
