@@ -12,6 +12,7 @@ export default function EditProjectPage() {
   const { users, loading, error, getUsersByRole } = useUser()
   const [submitting, setSubmitting] = useState(false)
   const [fetching, setFetching] = useState(true)
+  const [project, setProject] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -26,7 +27,14 @@ export default function EditProjectPage() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const token = localStorage.getItem('token')
+        setFetching(true)
+        const token = localStorage.getItem('devQuestUserToken')
+        if (!token) {
+          toast.error('Authentication required')
+          router.push('/login')
+          return
+        }
+
         const response = await fetch(`http://localhost:4000/api/project/${projectId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -38,16 +46,25 @@ export default function EditProjectPage() {
           throw new Error(error.message || 'Failed to fetch project')
         }
 
-        const project = await response.json()
+        const projectData = await response.json()
+        
+        // Check if project can be edited (only assigned or cancelled)
+        if (projectData.status !== 'assigned' && projectData.status !== 'cancelled') {
+          toast.error('Cannot edit project that has been accepted by PM')
+          router.push('/dashboard/projects')
+          return
+        }
+
+        setProject(projectData)
         
         // Format the project data for the form
         setFormData({
-          title: project.title || '',
-          description: project.description || '',
-          pm: project.pm?._id || project.pm || '',
-          deadline: project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : '',
-          tags: project.tags ? project.tags.join(', ') : '',
-          projectXp: project.projectXp || 0,
+          title: projectData.title || '',
+          description: projectData.description || '',
+          pm: projectData.pm?._id || projectData.pm || '',
+          deadline: projectData.deadline ? new Date(projectData.deadline).toISOString().split('T')[0] : '',
+          tags: projectData.tags ? projectData.tags.join(', ') : '',
+          projectXp: projectData.projectXp || 0,
         })
       } catch (error) {
         console.error('Error fetching project:', error)
@@ -79,35 +96,40 @@ export default function EditProjectPage() {
       return
     }
 
-    if (!formData.pm) {
-      toast.error('Please select a project manager')
-      return
-    }
-
     setSubmitting(true)
 
     try {
       const payload = {
         title: formData.title,
         description: formData.description,
-        pm: formData.pm,
         deadline: formData.deadline || null,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [],
         projectXp: parseInt(formData.projectXp) || 0,
+      }
+
+      // Only include PM if changed and project is in editable state
+      if (formData.pm) {
+        payload.pm = formData.pm
+      }
+
+      const token = localStorage.getItem('devQuestUserToken')
+      if (!token) {
+        throw new Error('Authentication required')
       }
 
       const response = await fetch(`http://localhost:4000/api/project/${projectId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       })
 
+      const result = await response.json()
+
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to update project')
+        throw new Error(result.message || 'Failed to update project')
       }
 
       toast.success('Project updated successfully!')
@@ -124,6 +146,14 @@ export default function EditProjectPage() {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
         <div className="text-center text-slate-400">Loading project...</div>
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+        <div className="text-center text-red-400">Project not found or cannot be edited</div>
       </div>
     )
   }
@@ -151,6 +181,7 @@ export default function EditProjectPage() {
             onChange={handleChange}
             placeholder="Enter project title"
             className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"
+            required
           />
         </div>
 
@@ -170,7 +201,7 @@ export default function EditProjectPage() {
 
         <div>
           <label className="block text-sm font-medium text-white mb-2">
-            Project Manager *
+            Project Manager
           </label>
           <select
             name="pm"
@@ -180,11 +211,11 @@ export default function EditProjectPage() {
             className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="">
-              {loading ? 'Loading managers...' : pms.length > 0 ? 'Select a project manager' : 'No PMs available'}
+              {loading ? 'Loading managers...' : pms.length > 0 ? 'Select a project manager (optional)' : 'No PMs available'}
             </option>
             {pms.map(pm => (
               <option key={pm._id} value={pm._id}>
-                {pm.name} - {pm.email}
+                {pm.name || pm.username || 'Unknown'} - {pm.email || 'No email'}
               </option>
             ))}
           </select>
@@ -215,6 +246,9 @@ export default function EditProjectPage() {
             placeholder="e.g., frontend, backend, urgent"
             className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"
           />
+          <p className="mt-1 text-xs text-slate-400">
+            Separate tags with commas
+          </p>
         </div>
 
         <div>
