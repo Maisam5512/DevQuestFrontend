@@ -32,6 +32,14 @@ else if (user?.role === "pm") {
         { href: "/dashboard/assignTask", label: "Create New Task", icon: Plus },
 
   ];
+
+}else if (user?.role === "developer") {
+  navItems = [
+    ...baseNavItems,
+    { href: "/dashboard/myTask", label: "My Tasks", icon: ClipboardList },
+
+  ];
+
 }
 else {
   navItems = [...baseNavItems];
