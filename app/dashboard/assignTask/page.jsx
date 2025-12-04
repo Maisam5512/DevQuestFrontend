@@ -556,7 +556,7 @@ export default function TasksPage() {
                             )}
                           </div>
 
-                          <div className="flex gap-2 flex-shrink-0">
+                          <div className="flex gap-2 shrink-0">
                             <Button
                               size="sm"
                               className="bg-blue-600 text-white hover:bg-blue-700"
