@@ -38,8 +38,8 @@
 
 
 
-
 import { Geist, Geist_Mono } from 'next/font/google'
+import type { ReactNode } from 'react'
 import './globals.css'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/hooks/useAuth'
@@ -60,7 +60,7 @@ export const viewport = {
   userScalable: 'yes',
 }
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
